@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>popup</title>
+  <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+  <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous"> -->
+  <link rel="stylesheet" href="/css/index.css">
+  <link rel="stylesheet" href="/css/popup.css">
+</head>
+<body>
+  <div class="container">
+    <div class="mask hide">
+      <i class="iconfont icon-loading"></i>
+    </div>
+    <div id="other-platform">
+      <h1>其他平台入口</h1>
+    </div>
+    <a class="no-login hide" target="_blank" href="https://fxg.jinritemai.com/login">请登录</a>
+    <div class="condition hide">
+      <div class="checkbox">
+        <input class="pointer" type="checkbox" id="is-jump">
+        <label class="pointer" for="is-jump">是否跳转测试环境</label>
+      </div>
+      <div class="checkbox">
+        <input class="pointer" type="checkbox" id="is-prodution">
+        <label class="pointer" for="is-prodution">是否跳转正式环境</label>
+      </div>
+      <div class="checkbox">
+        <input class="pointer" type="checkbox" id="is-code">
+        <label class="pointer" for="is-code">只需复制code</label>
+      </div>
+    </div>
+    <ul>
+      <!-- <li>
+        <img src="/images/icon48.png">
+        <span>抖搬家</span>
+      </li> -->
+    </ul>
+  </div>
+  <script src="/js/jquery-3.7.0.min.js"></script>
+  <script src="/js/axios.mini.js"></script>
+  <script src="/js/popup.js"></script>
+</body>
+</html>

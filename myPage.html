@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>获取</title>
+  <link rel="stylesheet" href="/css/index.css">
+  <link rel="stylesheet" href="/css/loading.css">
+  <link rel="stylesheet" href="/css/myPage.css">
+  <link rel="stylesheet" href="/css/message.min.css">
+</head>
+<body>
+  <div class="condition">
+    <div class="checkbox">
+      <input class="pointer" type="checkbox" id="is-jump">
+      <label class="pointer" for="is-jump">是否跳转测试环境</label>
+    </div>
+    <div class="checkbox">
+      <input class="pointer" type="checkbox" id="is-prodution">
+      <label class="pointer" for="is-prodution">是否跳转正式环境</label>
+    </div>
+    <div class="checkbox">
+      <input class="pointer" type="checkbox" id="is-code">
+      <label class="pointer" for="is-code">只需复制code</label>
+    </div>
+  </div>
+  <ul class="platform-list">
+    <li>
+      <div class="title flex align-items-center">
+        <h3>快手平台：</h3>
+        <a target="_blank" class="hide" id="ks-login" href="https://login.kwaixiaodian.com/?biz=fuwu&redirect_url=https%3A%2F%2Ffuwu.kwaixiaodian.com%2Fnew%2Fmerchant%2FtoolService">未登录</a>
+      </div>
+      <div class="list flex" id="ks-app-list">
+      </div>
+    </li>
+    <li>
+      <div class="title flex align-items-center">
+        <h3>视频号平台：</h3>
+        <a target="_blank" class="hide" id="sph-login" href="https://channels.weixin.qq.com/shop">未登录</a>
+      </div>
+      <div class="list flex" id="sph-app-list">
+      </div>
+    </li>
+    <li>
+      <div class="title flex align-items-center">
+        <h3>小红书平台：</h3>
+        <a target="_blank" class="hide" id="xhs-login" href="https://customer.xiaohongshu.com/login?service=https://ark.xiaohongshu.com/app-seller/my-service">未登录</a>
+      </div>
+      <div class="list flex" id="xhs-app-list">
+      </div>
+    </li>
+    <li>
+      <div class="title flex align-items-center">
+        <h3>拼多多平台：</h3>
+        <a target="_blank" class="hide" id="pdd-login" href="https://fuwu.pinduoduo.com/service-market/auth?response_type=code&client_id=330453bf045d417fb897e6039b5ec007&redirect_uri=http://pddmove.chaojids.com/&state=dev">未登录</a>
+      </div>
+      <div class="list flex" id="pdd-app-list">
+        <!-- 临时的抖搬家-拼多多 -->
+      </div>
+    </li>
+  </ul>
+  <script src="/js/axios.mini.js"></script>
+  <script src="/js/loading.js"></script>
+  <script src="/js/message.min.js"></script>
+  <script src="/js/myPage.js"></script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+@import 'https://at.alicdn.com/t/c/font_4140772_20pv32p19w6.css?spm=a313x.manage_type_myprojects.i1.9.331e3a81hIZQSR&file=font_4140772_20pv32p19w6.css';
+
+/* 把我们所有标签的内外边距清0 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+/* em和i是斜体，斜体文字不倾斜 */
+em,
+i {
+  font-style: normal
+}
+/* 去掉li的小圆点 */
+li {
+  list-style: none
+}
+
+img {
+  /* 照顾低版本浏览器如果图片外面包含了链接会有边框的问题 */
+  border: 0;
+  /* 取消图片底侧空白缝隙问题 */
+  vertical-align: middle
+}
+/* 当我们鼠标经过按钮鼠标编程小手 */
+button {
+  cursor: pointer
+}
+
+a,a:link,a:visited,a:hover,a:active{
+  text-decoration: none;
+  color: #4784ff;
+}
+/* 按钮字体的指定 */
+button,
+input {
+  font-family: Microsoft YaHei, Heiti SC, tahoma, arial, Hiragino Sans GB, "\5B8B\4F53", sans-serif
+}
+
+input {
+  vertical-align: middle;
+}
+
+body {
+  /* 抗锯齿形，让文字显示的更加清晰 */
+  -webkit-font-smoothing: antialiased;
+  background-color: #fff;
+  font: 12px/1.5 Microsoft YaHei, Heiti SC, tahoma, arial, Hiragino Sans GB, "\5B8B\4F53", sans-serif;
+  color: #666
+}

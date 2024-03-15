@@ -1,0 +1,48 @@
+{
+  "manifest_version": 2,
+  "name": "获取授权链接",
+  "description": "获取授权链接插件",
+  "version": "1.0.2",
+  "browser_action": {
+    "default_title": "获取授权链接",
+    "default_icon": "images/icon48.png",
+    "default_popup": "popup/popup.html"
+  },
+  "background": {
+    "scripts": [
+      "js/my-axios.js",
+      "background/index.js"
+    ]
+  },
+  "permissions": [
+    "cookies",
+		"tabs",
+		"notifications",
+		"webRequest",
+		"webRequestBlocking",
+		"storage",
+		"unlimitedStorage",
+		"http://*/*",
+		"https://*/*"
+  ],
+  "icons": {
+    "16": "images/icon48.png",
+    "48": "images/icon48.png",
+    "128": "images/icon48.png"
+  },
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "js/jquery-3.7.0.min.js"
+      ],
+      "css":[
+        "css/index.css"
+      ]
+    }
+  ]
+}
