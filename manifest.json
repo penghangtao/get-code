@@ -10,7 +10,10 @@
   },
   "background": {
     "scripts": [
+      "js/a_bogus.js",
+      "js/a_bogus_new.js",
       "js/my-axios.js",
+      "js/a_bogus_164_bdms.js",
       "background/index.js"
     ]
   },

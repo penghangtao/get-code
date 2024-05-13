@@ -5404,6 +5404,18 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
       const value = details.requestHeaders.find(item => item.name === 'Cookie')?.value
       tmToken = getTmToken(value)
     }
+    else if(details.url.includes('compass.jinritemai.com')) {
+      details.requestHeaders.push({ name: 'Referer', value: 'https://compass.jinritemai.com/' })
+      // details.requestHeaders.push({ name: 'Sec-Fetch-Site', value: 'same-origin' })
+    }
+    else if(details.url.includes('haohuo.jinritemai.com/aweme/v2/shop/promotion/pack/h5')) {
+      details.requestHeaders.push({ name: 'Referer', value: 'https://haohuo.jinritemai.com/' })
+      details.requestHeaders.push({ name: 'Origin', value: 'https://haohuo.jinritemai.com' })
+    }
+    else if(details.url.includes('live.douyin.com/aweme/v1/web/ecom/order/confirm/edit')) {
+      details.requestHeaders.push({ name: 'Referer', value: 'https://live.douyin.com/?is_aweme_tied=1' })
+      details.requestHeaders.push({ name: 'Origin', value: 'https://live.douyin.com' })
+    }
     return { requestHeaders: details.requestHeaders }
   },
   { urls: ["<all_urls>"] },
@@ -5538,8 +5550,9 @@ async function handleRequest(url, config, method = 'GET') {
   const res = await axios({
     method,
     url,
-    params
-  }, 'application/json', 1, true)
+    params,
+    withCredentials: true
+  })
   const reg = new RegExp(`(?<=(${callback}\\()).*?(?=(\\}\\)))`)
   const resultRes = JSON.parse(reg.exec(res)[0] + '}')
   if (!resultRes) throw new Error('请求接口返回参数失败，请检查NetWork查看接口返回信息')
@@ -5625,3 +5638,244 @@ async function init() {
 // init()
 
 // albbDetail()
+
+function rand(min, max) {
+  return Math.floor(Math.random()*(max-min))+min;
+}
+
+/**
+ * 生成fp
+ */
+function generateFp() {
+  var e = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".split("")
+    , t = e.length
+    , n = (new Date).getTime().toString(36)
+    , r = [];
+  r[8] = r[13] = r[18] = r[23] = "_",
+  r[14] = "4";
+  for (var o, i = 0; i < 36; i++)
+      r[i] || (o = 0 | Math.random() * t,
+      r[i] = e[19 == i ? 3 & o | 8 : o]);
+  return "verify_" + n + "_" + r.join("")
+}
+
+/**
+ * 获取msToken
+ */
+function getMsToken(url) {
+  return new Promise(resolve => {
+    chrome.cookies.get({url, name: 'msToken'}, function({ value }) {
+      resolve(value)
+    })
+  })
+}
+
+
+async function dyDetail(options) {
+  // 补环境生成ab的方法 new
+  // function get_ab(params = '_lid=760978404479&verifyFp=verify_luuurgq0_dafhQKTe_5awb_4D6g_BMxb_rhysh1HM81NM&fp=verify_luuurgq0_dafhQKTe_5awb_4D6g_BMxb_rhysh1HM81NM&msToken=PbCGCXXuAjjKrik9yUdcO26jMB47gMPMn4Gtt9QtU06wUQMIx5OHBHzK0HZ51OuWeHArLqjCkjUTzJrtz6olNVaNopzRGnfr-uyTRV8Z4sKwZbPhoBIpX8sqtg5aiowR', ua = navigator.userAgent) {
+  //   return window.bdms.init._v[2].p[40](0, 1, 12, params, data, ua) // old
+  //   return window.bdms.init._v[2].p[42](0, 1, 8, params, '', ua) // new
+  // }
+  // function _ab(params, ua = navigator.userAgent) {
+  //   return window.bdms.init._v[2].p[42](0, 1, 8, params, '', ua)
+  // }
+  if(options.params) {
+    const fp = generateFp()
+    Object.assign(options.params, {
+      verifyFp: fp,
+      fp,
+      msToken: await getMsToken(options.url)
+    })
+    Object.assign(options.params, {
+      a_bogus: generate_a_bogus(resolveData(options.params), navigator.userAgent)
+      // a_bogus: _ab(resolveData(options.params))
+    })
+  }
+
+  const data = await axios(options)
+
+  return JSON.parse(data)
+
+}
+
+dyDetail({
+  url: 'https://compass.jinritemai.com/compass_api/shop/product/product_chance_market/dig_category_card',
+  method: 'GET',
+  params: {
+    begin_date: '2024/05/04 00:00:00',
+    end_date: '2024/05/10 00:00:00',
+    date_type: 21,
+    activity_id: '',
+    industry_id: 4,
+    first_category_id: '20009',
+    content_type: 1,
+    rank_type: 2,
+    target_crowd: '',
+    page_size: 9,
+    page_no: 1,
+    _lid: Date.now(),
+  }
+}).then(res => {
+  console.log(res)
+})
+
+// dyDetail({
+//   url: 'https://fxg.jinritemai.com/api/commop/business_chance_center/clue/common/real_time_list',
+//   method: 'POST',
+//   // params,
+//   data: {
+//     "condition": {
+//         "clue_brand_exists": null,
+//         "clue_info": "",
+//         "categories": [
+//             {
+//                 "first_cid": 20009
+//             }
+//         ],
+//         "recently_created": false,
+//         "sort": {
+//             "sort_direction": 1,
+//             "sort_field": "MATCH_DEGREE"
+//         },
+//         "category_qualification": false,
+//         "category_clue_auto_submit": false,
+//         "tag_id_list": [],
+//         "profit_id_list": []
+//     },
+//     "clue_type": "",
+//     "clue_type_new": 1,
+//     "page": {
+//         "page_size": 15,
+//         "current": 1
+//     },
+//     "terminal_type": 0
+//   }
+// }).then(res => {
+//   console.log(res)
+// })
+
+async function dyOld(options) {
+  const { url, params, data } = options
+  const method = options.methos || 'POST'
+  const contentType = options.contentType || 'application/x-www-form-urlencoded'
+  Object.assign(params, {
+    msToken: await getMsToken(url)
+  })
+  const isGenerateAbogus = options.isGenerateAbogus === undefined ? true : options.isGenerateAbogus
+  // console.log(bdms.init._v[2].p)
+  let a_bogus = bdms.init._v[2].p[40](0,1,12, resolveData(params), resolveData(data), navigator.userAgent)
+  if(isGenerateAbogus) {
+    a_bogus = get_a_bogus(
+      resolveData(params),
+      resolveData(data),
+      navigator.userAgent
+    )
+  }
+  Object.assign(params, { a_bogus })
+  const res = await axios({
+    url,
+    method,
+    params,
+    data,
+    contentType
+  })
+  try {
+    return JSON.parse(res)
+  } catch(err) {
+    console.error(err)
+    return ''
+  }
+}
+
+/* dyOld({
+  url: 'https://haohuo.jinritemai.com/aweme/v2/shop/promotion/pack/h5/',
+  params: {
+    is_h5: "1",
+    is_native_h5: "1",
+    verifyFp: generateFp(),
+    origin_type: "detail_share",
+  },
+  data: {
+    ui_params: {
+      from_live: false,
+      from_video: null,
+      three_d_log_data: null,
+      follow_status: null,
+      which_account:null,
+      ad_log_extra: null,
+      from_group_id: null,
+      bolt_param: null,
+      transition_tracker_data: null,
+      selected_ids: null,
+      window_reposition: null,
+      is_short_screen: null,
+      full_mode: true
+    },
+    use_new_price: 1,
+    is_h5: 1,
+    bff_type: 2,
+    is_in_app: 0,
+    origin_type: 'detail_share',
+    promotion_ids: '3682325883177271746',
+    meta_param: '',
+    source_page: '',
+    request_additions: '',
+    isFromVideo: false,
+    enable_timing: true,
+  }
+}).then(res => {
+  console.log(res)
+})
+
+dyOld({
+  url: 'https://live.douyin.com/aweme/v2/shop/promotion/pack/detail/',
+  params: {
+    is_h5: 1,
+    origin_type: 'detail_share'
+  },
+  data: {
+    bff_type: 2,
+    is_h5: 1,
+    origin_type: 'detail_share',
+    promotion_id: '3682325883177271746',
+  },
+  isGenerateAbogus: false
+}).then(res => {
+  console.log(res)
+}) */
+
+axios({
+  url: 'https://live.douyin.com/aweme/v1/web/ecom/order/confirm/edit/?aid=6383',
+  method: 'POST',
+  data: {
+    json_form: {
+      edit_type: 7,
+      shop_requests: [
+        {
+          shop_id:"hWSETkdZ",
+          product_requests: [
+            {
+              product_id:"3680354280772075867",
+              sku_id:"7366640339039699240"
+            },
+            {
+              product_id:"3680354280772075867",
+              sku_id:"7366640339039748392"
+            },
+            {
+              product_id:"3680354280772075867",
+              sku_id:"7366640339039732008"
+            },
+            {
+              product_id:"3680354280772075867",
+              sku_id:"7366640339039715624"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  contentType: 'application/x-www-form-urlencoded'
+})
+
