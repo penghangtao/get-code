@@ -5404,18 +5404,25 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
       const value = details.requestHeaders.find(item => item.name === 'Cookie')?.value
       tmToken = getTmToken(value)
     }
-    else if(details.url.includes('compass.jinritemai.com')) {
-      details.requestHeaders.push({ name: 'Referer', value: 'https://compass.jinritemai.com/' })
-      // details.requestHeaders.push({ name: 'Sec-Fetch-Site', value: 'same-origin' })
+    // 需要带上请求头 Referer 和 Origin
+    const needHeaderList = ['https://compass.jinritemai.com', 'https://haohuo.jinritemai.com', 'https://live.douyin.com']
+    const url = needHeaderList.find(val => details.url.includes(val))
+    if(url) {
+      details.requestHeaders.push({ name: 'Referer', value: url + '/' })
+      details.requestHeaders.push({ name: 'Origin', value: url })
     }
-    else if(details.url.includes('haohuo.jinritemai.com/aweme/v2/shop/promotion/pack/h5')) {
-      details.requestHeaders.push({ name: 'Referer', value: 'https://haohuo.jinritemai.com/' })
-      details.requestHeaders.push({ name: 'Origin', value: 'https://haohuo.jinritemai.com' })
-    }
-    else if(details.url.includes('live.douyin.com/aweme/v1/web/ecom/order/confirm/edit')) {
-      details.requestHeaders.push({ name: 'Referer', value: 'https://live.douyin.com/?is_aweme_tied=1' })
-      details.requestHeaders.push({ name: 'Origin', value: 'https://live.douyin.com' })
-    }
+    // else if(details.url.includes('compass.jinritemai.com')) {
+    //   details.requestHeaders.push({ name: 'Referer', value: 'https://compass.jinritemai.com/' })
+    //   details.requestHeaders.push({ name: 'Origin', value: 'https://compass.jinritemai.com' })
+    // }
+    // else if(details.url.includes('haohuo.jinritemai.com/aweme/v2/shop/promotion/pack/h5')) {
+    //   details.requestHeaders.push({ name: 'Referer', value: 'https://haohuo.jinritemai.com/' })
+    //   details.requestHeaders.push({ name: 'Origin', value: 'https://haohuo.jinritemai.com' })
+    // }
+    // else if(details.url.includes('live.douyin.com/aweme')) {
+    //   details.requestHeaders.push({ name: 'Referer', value: 'https://live.douyin.com/' })
+    //   details.requestHeaders.push({ name: 'Origin', value: 'https://live.douyin.com' })
+    // }
     return { requestHeaders: details.requestHeaders }
   },
   { urls: ["<all_urls>"] },
@@ -5818,9 +5825,6 @@ async function dyOld(options) {
     is_in_app: 0,
     origin_type: 'detail_share',
     promotion_ids: '3682325883177271746',
-    meta_param: '',
-    source_page: '',
-    request_additions: '',
     isFromVideo: false,
     enable_timing: true,
   }

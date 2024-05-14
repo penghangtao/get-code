@@ -354,7 +354,7 @@ function base64encode(message, base64table) {
 }
 
 function get_a_bogus(url, data, ua = navigator.userAgent) {
-  const ua_arr = hexToDecimalArray(sm3Digest(asciiTranslate(base64encode(xor_encrypt(ua, box1), 'ckdp1h4ZKsUB80/Mfvw36XIgR25+WQAlEi7NLboqYTOPuzmFjJnryx9HVGDaStCe='))))
+  const ua_arr = hexToDecimalArray(sm3Digest(asciiTranslate(base64encode(xor_encrypt(ua, [...box1]), 'ckdp1h4ZKsUB80/Mfvw36XIgR25+WQAlEi7NLboqYTOPuzmFjJnryx9HVGDaStCe='))))
   const url_arr = hexToDecimalArray(sm3Digest(hexToDecimalArray(sm3Digest(asciiTranslate(url + 'bds')))))
   let data_arr = [83, 69, 109, 82, 24, 153, 247, 200, 198, 128, 168, 162, 244, 70, 5, 146, 100, 77, 138, 136, 44, 218, 117, 115, 118, 120, 152, 238, 238, 224, 239, 43]
   if(data) {
@@ -372,14 +372,14 @@ function get_a_bogus(url, data, ua = navigator.userAgent) {
   m29.push(m29.reduce((x, y) => x ^ y, 0))
 
   // console.log(t2, '-----', m29)
-  const m1 = asciiTranslate([(((t2 >> 0) & 255) & 170) | 1, (((t2 >> 0) & 255) & 85) | 2, (((t2 >> 8) & 255) & 170) | 64, (((t2 >> 8) & 255) & 85) | 2], 2).join('') + xor_encrypt(asciiTranslate(m29, 2).join(''), box2).join('')
+  const m1 = asciiTranslate([(((t2 >> 0) & 255) & 170) | 1, (((t2 >> 0) & 255) & 85) | 2, (((t2 >> 8) & 255) & 170) | 64, (((t2 >> 8) & 255) & 85) | 2], 2).join('') + xor_encrypt(asciiTranslate(m29, 2).join(''), [...box2]).join('')
   // console.log(m1, m1.split(''))
   const ab = base64encode(m1.split(''), 'Dkdpgh2ZmsQB80/MfvV36XI1R45-WUAlEixNLwoqYTOPuzKFjJnry79HbGcaStCe=')
   return ab
 
 }
 
-// a_bogus(
+// get_a_bogus(
 //   'is_h5=1&is_native_h5=1&verifyFp=verify_luaukolq_tQP6awxp_XllN_4FeK_AXy5_4CAd8u5wGiaL&origin_type=detail_share&msToken=nUj0DhKrZarBOH60ml48oXk80Gg0s9sDM8oRH-hv11ktYwkxc76fjCE-Ak1Wyff4HGGipv8ofhWCITfWeexFP0lwx5LOA0OUDat5SM1SMtA-ZJ2Tid-HFtGOJmUR7itl',
 //   'ui_params=%7B%22source_page%22%3A%22copy%22%2C%22from_live%22%3Afalse%2C%22from_video%22%3Anull%2C%22source_method%22%3A%22product_card%22%2C%22carrier_source%22%3A%22search_ecommerce_scan%22%2C%22three_d_log_data%22%3Anull%2C%22follow_status%22%3Anull%2C%22which_account%22%3Anull%2C%22ad_log_extra%22%3Anull%2C%22from_group_id%22%3Anull%2C%22bolt_param%22%3Anull%2C%22transition_tracker_data%22%3Anull%2C%22request_additions%22%3A%7B%22from_internal_feed%22%3Afalse%2C%22cps_track%22%3A%22%22%2C%22marketing_channel%22%3A%22%22%2C%22ecom_scene_id%22%3A%221082%22%7D%2C%22selected_ids%22%3Anull%2C%22window_reposition%22%3Anull%2C%22is_short_screen%22%3Anull%2C%22full_mode%22%3Atrue%7D&use_new_price=1&is_h5=1&bff_type=2&is_in_app=0&origin_type=detail_share&promotion_ids=3630074402865023819&item_id=0&meta_param=%7B%22entrance_info%22%3A%22%7B%5C%22EVENT_ORIGIN_FEATURE%5C%22%3A%5C%22TEMAI%5C%22%2C%5C%22carrier_source%5C%22%3A%5C%22search_ecommerce_scan%5C%22%2C%5C%22ecom_scene_id%5C%22%3A%5C%221082%5C%22%2C%5C%22product_activity_type%5C%22%3A%5C%22nonactivity%5C%22%2C%5C%22search_keyword%5C%22%3A%5C%22image_search_202403281356253BE345543F394CEBA36A%5C%22%2C%5C%22enter_from_merge%5C%22%3A%5C%22search_ecommerce_scan%5C%22%2C%5C%22apt_path_id%5C%22%3A%5C%221%5C%22%2C%5C%22share_id%5C%22%3A%5C%22MS4wLjABAAAAJEE8R25CgTaOAANfiyAWKY6cD3La9dyynVtXO2cxLY8_request_page_1%5C%22%2C%5C%22search_id%5C%22%3A%5C%2220240328135634F6B990D021DDCD9CC5C1%5C%22%2C%5C%22search_params%5C%22%3A%5C%22%7B%5C%5C%5C%22search_id%5C%5C%5C%22%3A%5C%5C%5C%2220240328135634F6B990D021DDCD9CC5C1%5C%5C%5C%22%2C%5C%5C%5C%22search_result_id%5C%5C%5C%22%3A%5C%5C%5C%223630074402865023819%5C%5C%5C%22%2C%5C%5C%5C%22pipeline_version%5C%5C%5C%22%3A%5C%5C%5C%221%5C%5C%5C%22%7D%5C%22%2C%5C%22source_method%5C%22%3A%5C%22product_card%5C%22%2C%5C%22ecom_group_type%5C%22%3A%5C%22video%5C%22%2C%5C%22live_tracker_params%5C%22%3A%5C%22%5C%22%2C%5C%22card_status%5C%22%3A%5C%22%5C%22%7D%22%2C%22market_address%22%3A%22%7B%5C%22address_detail%5C%22%3A%5C%22%7B%5C%5C%5C%22address_list%5C%5C%5C%22%3A%5B%7B%5C%5C%5C%22address%5C%5C%5C%22%3A%7B%5C%5C%5C%22id%5C%5C%5C%22%3A%5C%5C%5C%227156876279147544589%5C%5C%5C%22%2C%5C%5C%5C%22address_type%5C%5C%5C%22%3A4%2C%5C%5C%5C%22extra%5C%5C%5C%22%3A%7B%5C%5C%5C%22strategy%5C%5C%5C%22%3A%5C%5C%5C%22poi_address%5C%5C%5C%22%7D%7D%2C%5C%5C%5C%22biz_code%5C%5C%5C%22%3A%5C%5C%5C%22xiaodian.supermarket_pop%5C%5C%5C%22%7D%5D%7D%5C%22%7D%22%7D&source_page=copy&request_additions=%7B%22from_internal_feed%22%3A%22false%22%2C%22cps_track%22%3A%22%22%2C%22marketing_channel%22%3A%22%22%2C%22ecom_scene_id%22%3A%221082%22%7D&author_id=99514375927&isFromVideo=false&ec_s=127ab4d4e9ab12360cf4cbf94061c94c0c09352f75a752_HMZoCojDcMgtbRPbmR8sPNLhounrU5Bs4rwBSn0G6lQ%3D&ec_promotion_id=3630074402865023819&enter_from=copy&enable_timing=true&from_internal_feed=false&cps_track=&marketing_channel=&ecom_scene_id=1082',
 //   navigator.userAgent
