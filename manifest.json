@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "获取授权链接",
   "description": "获取授权链接插件",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "browser_action": {
     "default_title": "获取授权链接",
     "default_icon": "images/icon48.png",
@@ -13,7 +13,7 @@
       "js/a_bogus.js",
       "js/a_bogus_new.js",
       "js/my-axios.js",
-      "js/a_bogus_44_bdms.js",
+      "js/a_bogus_164_bdms.js",
       "background/index.js"
     ]
   },
@@ -42,9 +42,14 @@
       ],
       "js": [
         "js/jquery-3.7.0.min.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://partner.tiktokshop.com/docv2/page/*"
       ],
-      "css":[
-        "css/index.css"
+      "js": [
+        "js/tiktok-notranslate.js"
       ]
     }
   ]

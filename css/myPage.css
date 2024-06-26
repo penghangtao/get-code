@@ -48,7 +48,7 @@ ul.platform-list li > .list {
   margin-top: 14px;
 }
 ul.platform-list li > .list > .item {
-  max-width: 150px;
+  width: 150px;
 }
 ul.platform-list li > .list > .item .app-logo {
   width: 60px;

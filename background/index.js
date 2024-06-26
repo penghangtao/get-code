@@ -5404,6 +5404,13 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
       const value = details.requestHeaders.find(item => item.name === 'Cookie')?.value
       tmToken = getTmToken(value)
     }
+    // else if(details.url.includes('live.douyin.com')) {
+    //   details.requestHeaders.push({ name: 'Referer', value: 'https://live.douyin.com/' })
+    //   details.requestHeaders.push({ name: 'Origin', value: 'https://live.douyin.com' })
+    //   details.requestHeaders.push({ name: 'Sec-Fetch-Site', value: 'same-origin' })
+    //   details.requestHeaders.push({ name: 'X-Secsdk-Csrf-Token', value: '000100000001e4d699022febde9aae7578f5dca4bb4ea1b97c6c4b905a9fbbce66a3cc4ebd2317d47f3ee2115249' })
+    //   return { requestHeaders: details.requestHeaders }
+    // }
     // 需要带上请求头 Referer 和 Origin
     const needHeaderList = ['https://compass.jinritemai.com', 'https://haohuo.jinritemai.com', 'https://live.douyin.com']
     const url = needHeaderList.find(val => details.url.includes(val))
@@ -5434,6 +5441,63 @@ function getTmToken(value) {
   const token = reg.exec(value)[0].split('_')[0]
   return token
 }
+
+const params_1 = {
+  is_h5: 1,
+  origin_type: 638301,
+  device_platform: 'webapp',
+  aid: 6383,
+  channel: 'channel_pc_web',
+  pc_client_type: 1,
+  update_version_code: '170400',
+  version_code: '',
+  version_name: '',
+  cookie_enabled: true,
+  screen_width: 1470,
+  screen_height: 956,
+  browser_language: 'zh-CN',
+  browser_platform: 'MacIntel',
+  browser_name: 'Chrome',
+  browser_version: '124.0.0.0',
+  browser_online: true,
+  engine_name: 'Blink',
+  engine_version: '124.0.0.0',
+  os_name: 'Mac+OS',
+  os_version: '10.15.7',
+  cpu_core_num: 8,
+  device_memory: 8,
+  platform: 'PC',
+  downlink: 10,
+  effective_type: '4g',
+  round_trip_time: 100,
+  webid: '7375048171702978063',
+  msToken: 'T3F2nBU-vyodP2UQniDbU6SawCfYRZV5nbjcHIuhZSw0bnJUrIERADVn1jjUbP3Lcof0Z9cUdanN0LXMsOh0FpFl2xPk9eghRm5pvLgVrqG12TdQhHXvcJsxZoPhk6Y=',
+}
+const data_1 = {
+  bff_type: 2,
+  ec_promotion_id: '3676246593310425327',
+  is_h5: 1,
+  item_id: 0,
+  // live_room_id: '7374954937610013440',
+  // origin_type: 638301,
+  promotion_ids: '3676246593310425327',
+  // room_id: '7374954937610013440',
+  // sec_author_id: 'MS4wLjABAAAAnf29BoTMkSKrYu3j2y9fpIOMbifPNU4jwlQ7kdhIlQI9OGiw1_ZsoGLFD0QTwyxr',
+  use_new_price: 1,
+}
+
+// axios({
+//   url: 'https://live.douyin.com/ecom/product/detail/saas/pc/',
+//   method: 'POST',
+//   contentType: 'application/x-www-form-urlencoded',
+//   params: {
+//     ...params_1,
+//     a_bogus: window.bdms.init._v[2].p[42](0,1,8,resolveData(params_1), resolveData(data_1), navigator.userAgent),
+//   },
+//   data: data_1,
+// }).then(res => {
+//   console.log(res)
+// })
 
 // 拼多多商家后台
 // async function pddMms() {
@@ -5706,26 +5770,39 @@ async function dyDetail(options) {
 
 }
 
-dyDetail({
-  url: 'https://compass.jinritemai.com/compass_api/shop/product/product_chance_market/dig_category_card',
-  method: 'GET',
-  params: {
-    begin_date: '2024/05/04 00:00:00',
-    end_date: '2024/05/10 00:00:00',
-    date_type: 21,
-    activity_id: '',
-    industry_id: 4,
-    first_category_id: '20009',
-    content_type: 1,
-    rank_type: 2,
-    target_crowd: '',
-    page_size: 9,
-    page_no: 1,
-    _lid: Date.now(),
-  }
-}).then(res => {
-  console.log(res)
-})
+// dyDetail({
+//   url: 'https://compass.jinritemai.com/compass_api/shop/product/product_chance_market/dig_category_card',
+//   method: 'GET',
+//   params: {
+//     begin_date: '2024/05/04 00:00:00',
+//     end_date: '2024/05/10 00:00:00',
+//     date_type: 21,
+//     activity_id: '',
+//     industry_id: 4,
+//     first_category_id: '20009',
+//     content_type: 1,
+//     rank_type: 2,
+//     target_crowd: '',
+//     page_size: 9,
+//     page_no: 1,
+//     _lid: Date.now(),
+//   }
+// }).then(res => {
+//   console.log(res)
+// })
+
+// dyDetail({
+//   url: 'https://compass.jinritemai.com/compass_api/shop/product/industry_first_category',
+//   method: 'GET',
+//   params: {
+//     scene: 1,
+//     need_all_industry: false,
+//     need_all_first_category: false,
+//     _lid: Date.now()
+//   }
+// }).then(res => {
+//   console.log(res)
+// })
 
 // dyDetail({
 //   url: 'https://fxg.jinritemai.com/api/commop/business_chance_center/clue/common/real_time_list',
@@ -5849,37 +5926,37 @@ dyOld({
   console.log(res)
 }) */
 
-axios({
-  url: 'https://live.douyin.com/aweme/v1/web/ecom/order/confirm/edit/?aid=6383',
-  method: 'POST',
-  data: {
-    json_form: {
-      edit_type: 7,
-      shop_requests: [
-        {
-          shop_id:"hWSETkdZ",
-          product_requests: [
-            {
-              product_id:"3680354280772075867",
-              sku_id:"7366640339039699240"
-            },
-            {
-              product_id:"3680354280772075867",
-              sku_id:"7366640339039748392"
-            },
-            {
-              product_id:"3680354280772075867",
-              sku_id:"7366640339039732008"
-            },
-            {
-              product_id:"3680354280772075867",
-              sku_id:"7366640339039715624"
-            }
-          ]
-        }
-      ]
-    }
-  },
-  contentType: 'application/x-www-form-urlencoded'
-})
+// axios({
+//   url: 'https://live.douyin.com/aweme/v1/web/ecom/order/confirm/edit/?aid=6383',
+//   method: 'POST',
+//   data: {
+//     json_form: {
+//       edit_type: 7,
+//       shop_requests: [
+//         {
+//           shop_id:"hWSETkdZ",
+//           product_requests: [
+//             {
+//               product_id:"3680354280772075867",
+//               sku_id:"7366640339039699240"
+//             },
+//             {
+//               product_id:"3680354280772075867",
+//               sku_id:"7366640339039748392"
+//             },
+//             {
+//               product_id:"3680354280772075867",
+//               sku_id:"7366640339039732008"
+//             },
+//             {
+//               product_id:"3680354280772075867",
+//               sku_id:"7366640339039715624"
+//             }
+//           ]
+//         }
+//       ]
+//     }
+//   },
+//   contentType: 'application/x-www-form-urlencoded'
+// })
 

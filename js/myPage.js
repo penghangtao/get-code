@@ -63,7 +63,8 @@ const defaultInfo = {
     const { isCode, isJump, isProdution } = this.conditionObj
     const { code } = this.getParams(url)
     if(isCode) {
-      this.copy(`?code=${code}`)
+      // this.copy(url.includes('jd') ? '?'+url.split('?')[1] : `?code=${code}`)
+      this.copy('?' + url.split('?')[1])
       await this.sleep(100)
       this.createMessage({
         type: 'success',
@@ -142,417 +143,523 @@ const defaultInfo = {
   },
 }
 
-// 快手相关
-const ksInfo = {
-  url: 'https://fuwu.kwaixiaodian.com/', // api地址
-  loginUrl: 'https://login.kwaixiaodian.com/?biz=fuwu&redirect_url=https%3A%2F%2Ffuwu.kwaixiaodian.com%2Fnew%2Fmerchant%2FtoolService', // 登录链接
-  loginDom: document.getElementById('ks-login'),
-  appListDom: document.getElementById('ks-app-list'),
-  /**
-   * 初始化
-   */
-  async init() {
-    if(initFlag) {
-      this.eventListener()
-    }
-    await this.getAppList()
-    initFlag = false
-  },
-  /**
-   * 监听dom事件
-   */
-  eventListener() {
-    const that = this
-    this.appListDom.addEventListener('click', async function(e) {
-      const targetNode = e.target.parentNode
-      if(!targetNode.classList.contains('item')) return
-      const appKey = targetNode.getAttribute('data-appKey')
-      const loading = defaultInfo.createLoading('玩命加载中，请稍后...')
-      const { data } = await axios({
-        url: that.url + 'rest/pc/open/market/oauth/authInfo',
-        method: 'GET',
-        params: {
-          appId: appKey
+const platformInfoList = {
+  // 快手相关
+  ksInfo: {
+    name: '快手平台',
+    type: 'ks',
+    url: 'https://fuwu.kwaixiaodian.com/', // api地址
+    loginUrl: 'https://login.kwaixiaodian.com/?biz=fuwu&redirect_url=https%3A%2F%2Ffuwu.kwaixiaodian.com%2Fnew%2Fmerchant%2FtoolService', // 登录链接
+    loginDom: null,
+    appListDom: null,
+    /**
+     * 初始化
+     */
+    async init() {
+      if(initFlag) {
+        this.eventListener()
+      }
+      await this.getAppList()
+      initFlag = false
+    },
+    /**
+     * 监听dom事件
+     */
+    eventListener() {
+      const that = this
+      this.appListDom.addEventListener('click', async function(e) {
+        const targetNode = e.target.parentNode
+        if(!targetNode.classList.contains('item')) return
+        const appKey = targetNode.getAttribute('data-appKey')
+        const loading = defaultInfo.createLoading('玩命加载中，请稍后...')
+        const { data } = await axios({
+          url: that.url + 'rest/pc/open/market/oauth/authInfo',
+          method: 'GET',
+          params: {
+            appId: appKey
+          }
+        })
+        const res = await axios({
+          url: that.url + 'oauth2/web/api/auth_info',
+          method: 'POST',
+          data: {
+            appId: appKey,
+            redirectUri: data.redirectUrl,
+            responseType: 'code',
+            scope: data.scope,
+            state: ''
+          }
+        })
+        const { location } = await axios({
+          url: that.url + 'oauth2/web/api/grant',
+          method: 'POST',
+          data: {
+            appId: appKey,
+            confirmToken: res.confirmToken,
+            redirectUri: data.redirectUrl + '?source=kwaixiaodian',
+            responseType: 'code',
+            scope: data.scope,
+            state: '',
+          }
+        })
+        loading.hide()
+        const { isJump, code } = await defaultInfo.handleResult(location)
+        if(!isJump) return
+        if(location.includes('kbanjia.chaojids.com')) {
+          // 快手搬家
+          window.open('http://kwaimovetest.chaojids.com' + code)
         }
       })
+    },
+    /**
+     * 获取应用列表
+     */
+    async getAppList() {
       const res = await axios({
-        url: that.url + 'oauth2/web/api/auth_info',
+        url: this.url + 'rest/pc/open/market/merchant/service/search',
         method: 'POST',
         data: {
-          appId: appKey,
-          redirectUri: data.redirectUrl,
-          responseType: 'code',
-          scope: data.scope,
-          state: ''
+          endTime: '',
+          pageNum: 1,
+          pageSize: 100,
+          startTime: '',
+          valid: 1
         }
       })
-      const { location } = await axios({
-        url: that.url + 'oauth2/web/api/grant',
-        method: 'POST',
-        data: {
-          appId: appKey,
-          confirmToken: res.confirmToken,
-          redirectUri: data.redirectUrl + '?source=kwaixiaodian',
-          responseType: 'code',
-          scope: data.scope,
-          state: '',
-        }
-      })
-      loading.hide()
-      const { isJump, code } = await defaultInfo.handleResult(location)
-      if(!isJump) return
-      if(location.includes('kbanjia.chaojids.com')) {
-        // 快手搬家
-        window.open('http://kwaimovetest.chaojids.com' + code)
+      if(res.loginUrl) {
+        this.loginDom.classList.remove('hide')
+        return
       }
-    })
-  },
-  /**
-   * 获取应用列表
-   */
-  async getAppList() {
-    const res = await axios({
-      url: this.url + 'rest/pc/open/market/merchant/service/search',
-      method: 'POST',
-      data: {
-        endTime: '',
-        pageNum: 1,
-        pageSize: 100,
-        startTime: '',
-        valid: 1
-      }
-    })
-    if(res.loginUrl) {
-      this.loginDom.classList.remove('hide')
-      return
-    }
-    this.loginDom.classList.add('hide')
-    const list = res.data.dataList
-    const appListHtml = list.map(item => `
-      <div class="item pointer flex flex-column align-items-center" data-appKey="${item.appKey}">
-        <img src="${item.servicePicUrl}" class="app-logo">
-        <h5 class="app-name">${item.serviceName}</h5>
-      </div>
-    `).join('')
-    this.appListDom.innerHTML = appListHtml
-  },
-}
-
-// 小红书相关
-const xhsInfo = {
-  url: 'https://ark.xiaohongshu.com/api/', // api地址
-  loginUrl: 'https://customer.xiaohongshu.com/login?service=https://ark.xiaohongshu.com/app-seller/my-service', // 登录链接
-  loginDom: document.getElementById('xhs-login'),
-  appListDom: document.getElementById('xhs-app-list'),
-  userInfo: {
-    userId: '',
-    sellerId: '',
-    authToken: '',
-  },
-  /**
-   * 初始化
-   */
-  async init() {
-    if(initFlag) {
-      this.eventListener()
-    }
-    await this.getAppList()
-    initFlag = false
-  },
-  /**
-   * 监听dom事件
-   */
-  eventListener() {
-    const that = this
-    this.appListDom.addEventListener('click', async function(e) {
-      const targetNode = e.target.parentNode
-      if(!targetNode.classList.contains('item')) return
-      const appId = targetNode.getAttribute('data-appId')
-      const redirectUrl = targetNode.getAttribute('data-redirectUrl')
-      const loading = defaultInfo.createLoading('玩命加载中，请稍后...')
-      const { userId, sellerId, authToken } = that.userInfo
-      const { data: { code } } = await axios({
-        url: that.url + 'edith/openapi/getcode',
-        method: 'GET',
-        params: {
-          appId: appId,
-          userId: userId,
-          sellerId: sellerId,
-          authToken: authToken,
-          redirectUrl: redirectUrl,
-          subsystemAlias: 'ark',
-        }
-      })
-      const url = redirectUrl + '?code=' + code
-      loading.hide()
-      const { isJump } = await defaultInfo.handleResult(url)
-      if(!isJump) return
-      window.open(defaultInfo.insertStr(url, url.indexOf('.'), 'test'))
-    })
-  },
-  /**
-   * 获取应用列表
-   */
-  async getAppList() {
-    try {
-      const xhsToken = await this.getCookieToken()
-      if(!xhsToken) return
-      const { data: { account: { auth_token, seller_id } } } = await axios({
-        url: this.url + 'edith/account',
-        method: 'GET',
-        headers: {
-          Authorization: xhsToken
-        }
-      })
-      this.userInfo.authToken = auth_token
-      this.userInfo.sellerId = seller_id
-      const { data: { token } } = await axios({
-        url: this.url + 'edith/cs/im_token',
-        method: 'GET',
-      })
-      const { data: { refUserId } } = await axios({
-        url: 'https://wario.xiaohongshu.com/api/wario/accounts/info',
-        method: 'GET',
-        params: {
-          im_token: token
-        }
-      })
-      this.userInfo.userId = refUserId
-      const { data: { app_infos } } = await axios({
-        url: this.url + 'edith/openapi/get_app_list',
-        method: 'GET',
-        params: {
-          userId: refUserId
-        },
-      })
       this.loginDom.classList.add('hide')
-      const appListHtml = app_infos.map(item => `
-        <div class="item pointer flex flex-column align-items-center" data-appId="${item.app_id}" data-redirectUrl="${item.app_website}">
-          <img src="${item.app_icon_url}" class="app-logo">
-          <h5 class="app-name">${item.app_name}</h5>
-        </div>
-      `).join('')
-      this.appListDom.innerHTML = appListHtml
-    } catch(err) {
-      this.loginDom.classList.remove('hide')
-      return
-    }
-  },
-  /**
-   * 获取小红书 cookie 中的token
-   */
-  getCookieToken() {
-    return new Promise(resolve => {
-      chrome.cookies.get({ url: "https://ark.xiaohongshu.com", name: "access-token-ark.xiaohongshu.com" }, function(cookie) {
-        if (cookie) {
-          resolve(cookie.value.split('customer.ark.')[1])
-        } else {
-          resolve(null)
-        }
-      });
-    })
-  },
-}
-
-// 视频号相关
-const sphInfo = {
-  url: 'https://channels.weixin.qq.com/shop-faas/mmecnodeservicemarket/service/', // api地址
-  loginUrl: 'https://channels.weixin.qq.com/shop', // 登录链接
-  loginDom: document.getElementById('sph-login'),
-  appListDom: document.getElementById('sph-app-list'),
-  /**
-   * 初始化
-   */
-  async init() {
-    if(initFlag) {
-      this.eventListener()
-    }
-    await this.getAppList()
-    initFlag = false
-  },
-  /**
-   * 监听dom事件
-   */
-  eventListener() {
-    const that = this
-    this.appListDom.addEventListener('click', async function(e) {
-      const targetNode = e.target.parentNode
-      if(!targetNode.classList.contains('item')) return
-      const orderId = targetNode.getAttribute('data-orderId')
-      const serviceId = targetNode.getAttribute('data-serviceId')
-      const loading = defaultInfo.createLoading('玩命加载中，请稍后...')
-      const { jumpUrl } = await axios({
-        url: that.url + 'GenJumpServiceUrl',
-        method: 'GET',
-        params: {
-          serviceId,
-          orderId,
-          token: '',
-          lang: 'zh_CN',
-        }
-      })
-      loading.hide()
-      const { isJump } = await defaultInfo.handleResult(jumpUrl)
-      if(!isJump) return
-      window.open(jumpUrl)
-    })
-  },
-  /**
-   * 获取应用列表
-   */
-  async getAppList() {
-    try {
-      const { itemList } = await axios({
-        url: this.url + 'GetMyServiceList',
-        method: 'GET',
-        params: {
-          offset: 0,
-          limit: 20,
-          status: 2,
-          token: '',
-          lang: 'zh_CN'
-        }
-      })
-      const list = itemList.filter(item => item.subjectName === '杭州耀秀电子商务有限公司' && item.state === 1)
-      this.loginDom.classList.add('hide')
+      const list = res.data.dataList
       const appListHtml = list.map(item => `
-        <div class="item pointer flex flex-column align-items-center" data-orderId="${item.orderId}" data-serviceId="${item.serviceId}" data-is-test="${Number(item.serviceName.includes('测试'))}">
-          <img src="${item.imgUrl}" class="app-logo">
+        <div class="item pointer flex flex-column align-items-center" data-appKey="${item.appKey}">
+          <img src="${item.servicePicUrl}" class="app-logo">
           <h5 class="app-name">${item.serviceName}</h5>
         </div>
       `).join('')
       this.appListDom.innerHTML = appListHtml
-      this.listIsShow()
-    } catch(err) {
-      this.loginDom.classList.remove('hide')
-      return
-    }
+    },
   },
-  /**
-   * 列表是否展示
-   */
-  listIsShow() {
-    const { isProdution, isCode, isJump } = defaultInfo.conditionObj
-    const applistChildren = Array.from(this.appListDom.children)
-    if(!isProdution && !isCode && !isJump) {
-      applistChildren.forEach(item => {
-        item.classList.remove('hide')
-      })
-      return
-    }
-    const appList = applistChildren.filter(item => !parseInt(item.getAttribute('data-is-test')) === isProdution)
-    applistChildren.forEach(item => {
-      if(appList.includes(item)) {
-        item.classList.remove('hide')
-      } else {
-        item.classList.add('hide')
+  // 小红书相关
+  xhsInfo: {
+    name: '小红书平台',
+    type: 'xhs',
+    url: 'https://ark.xiaohongshu.com/api/', // api地址
+    loginUrl: 'https://customer.xiaohongshu.com/login?service=https://ark.xiaohongshu.com/app-seller/my-service', // 登录链接
+    loginDom: null,
+    appListDom: null,
+    userInfo: {
+      userId: '',
+      sellerId: '',
+      authToken: '',
+    },
+    /**
+     * 初始化
+     */
+    async init() {
+      if(initFlag) {
+        this.eventListener()
       }
-    })
+      await this.getAppList()
+      initFlag = false
+    },
+    /**
+     * 监听dom事件
+     */
+    eventListener() {
+      const that = this
+      this.appListDom.addEventListener('click', async function(e) {
+        const targetNode = e.target.parentNode
+        if(!targetNode.classList.contains('item')) return
+        const appId = targetNode.getAttribute('data-appId')
+        const redirectUrl = targetNode.getAttribute('data-redirectUrl')
+        const loading = defaultInfo.createLoading('玩命加载中，请稍后...')
+        const { userId, sellerId, authToken } = that.userInfo
+        const { data: { code } } = await axios({
+          url: that.url + 'edith/openapi/getcode',
+          method: 'GET',
+          params: {
+            appId: appId,
+            userId: userId,
+            sellerId: sellerId,
+            authToken: authToken,
+            redirectUrl: redirectUrl,
+            subsystemAlias: 'ark',
+          }
+        })
+        const url = redirectUrl + '?code=' + code
+        loading.hide()
+        const { isJump } = await defaultInfo.handleResult(url)
+        if(!isJump) return
+        window.open(defaultInfo.insertStr(url, url.indexOf('.'), 'test'))
+      })
+    },
+    /**
+     * 获取应用列表
+     */
+    async getAppList() {
+      try {
+        const xhsToken = await this.getCookieToken()
+        if(!xhsToken) return
+        const { data: { account: { auth_token, seller_id } } } = await axios({
+          url: this.url + 'edith/account',
+          method: 'GET',
+          headers: {
+            Authorization: xhsToken
+          }
+        })
+        this.userInfo.authToken = auth_token
+        this.userInfo.sellerId = seller_id
+        const { data: { token } } = await axios({
+          url: this.url + 'edith/cs/im_token',
+          method: 'GET',
+        })
+        const { data: { refUserId } } = await axios({
+          url: 'https://wario.xiaohongshu.com/api/wario/accounts/info',
+          method: 'GET',
+          params: {
+            im_token: token
+          }
+        })
+        this.userInfo.userId = refUserId
+        const { data: { app_infos } } = await axios({
+          url: this.url + 'edith/openapi/get_app_list',
+          method: 'GET',
+          params: {
+            userId: refUserId
+          },
+        })
+        this.loginDom.classList.add('hide')
+        const appListHtml = app_infos.map(item => `
+          <div class="item pointer flex flex-column align-items-center" data-appId="${item.app_id}" data-redirectUrl="${item.app_website}">
+            <img src="${item.app_icon_url}" class="app-logo">
+            <h5 class="app-name">${item.app_name}</h5>
+          </div>
+        `).join('')
+        this.appListDom.innerHTML = appListHtml
+      } catch(err) {
+        this.loginDom.classList.remove('hide')
+        return
+      }
+    },
+    /**
+     * 获取小红书 cookie 中的token
+     */
+    getCookieToken() {
+      return new Promise(resolve => {
+        chrome.cookies.get({ url: "https://ark.xiaohongshu.com", name: "access-token-ark.xiaohongshu.com" }, function(cookie) {
+          if (cookie) {
+            resolve(cookie.value.split('customer.ark.')[1])
+          } else {
+            resolve(null)
+          }
+        });
+      })
+    },
   },
-}
-
-// 拼多多相关
-const pddInfo = {
-  url: 'https://fuwu.pinduoduo.com/', // api地址
-  loginUrl: 'https://fuwu.pinduoduo.com/service-market/auth?response_type=code&client_id=330453bf045d417fb897e6039b5ec007&redirect_uri=http://pddmove.chaojids.com/&state=dev', // 登录链接
-  loginDom: document.getElementById('pdd-login'),
-  appListDom: document.getElementById('pdd-app-list'),
-  /**
-   * 初始化
-   */
-  async init() {
-    if(initFlag) {
-      this.eventListener()
-    }
-    await this.getAppList()
-    initFlag = false
-  },
-  /**
-   * 监听dom事件
-   */
-  eventListener() {
-    const that = this
-    this.appListDom.addEventListener('click', async function(e) {
-      const targetNode = e.target.parentNode
-      if(!targetNode.classList.contains('item')) return
-      const clientId = targetNode.getAttribute('data-clientId')
-      const loading = defaultInfo.createLoading('玩命加载中，请稍后...')
-      var anti_contnt = xjb(5)
-      result = new anti_contnt({ serverTime: new Date().getTime() })
-      const { result: { code } } = await axios({
-        url: that.url + 'columbine/oauth/authorize',
-        method: 'POST',
-        data: {
-          clientId,
-          responseType: "code",
-          isTrial: 0,
-          state: "dev",
-          scope: []
-        },
-        headers: {
-          'Origin': 'https://fuwu.pinduoduo.com',
-          'Anti-Content': result.messagePack()
+  // 视频号相关
+  sphInfo: {
+    name: '视频号平台',
+    type: 'sph',
+    url: 'https://channels.weixin.qq.com/shop-faas/mmecnodeservicemarket/service/', // api地址
+    loginUrl: 'https://channels.weixin.qq.com/shop', // 登录链接
+    loginDom: null,
+    appListDom: null,
+    /**
+     * 初始化
+     */
+    async init() {
+      if(initFlag) {
+        this.eventListener()
+      }
+      await this.getAppList()
+      initFlag = false
+    },
+    /**
+     * 监听dom事件
+     */
+    eventListener() {
+      const that = this
+      this.appListDom.addEventListener('click', async function(e) {
+        const targetNode = e.target.parentNode
+        if(!targetNode.classList.contains('item')) return
+        const orderId = targetNode.getAttribute('data-orderId')
+        const serviceId = targetNode.getAttribute('data-serviceId')
+        const loading = defaultInfo.createLoading('玩命加载中，请稍后...')
+        const { jumpUrl } = await axios({
+          url: that.url + 'GenJumpServiceUrl',
+          method: 'GET',
+          params: {
+            serviceId,
+            orderId,
+            token: '',
+            lang: 'zh_CN',
+          }
+        })
+        loading.hide()
+        const { isJump } = await defaultInfo.handleResult(jumpUrl)
+        if(!isJump) return
+        window.open(jumpUrl)
+      })
+    },
+    /**
+     * 获取应用列表
+     */
+    async getAppList() {
+      try {
+        const { itemList } = await axios({
+          url: this.url + 'GetMyServiceList',
+          method: 'GET',
+          params: {
+            offset: 0,
+            limit: 20,
+            status: 2,
+            token: '',
+            lang: 'zh_CN'
+          }
+        })
+        const list = itemList.filter(item => item.subjectName === '杭州耀秀电子商务有限公司' && item.state === 1)
+        this.loginDom.classList.add('hide')
+        const appListHtml = list.map(item => `
+          <div class="item pointer flex flex-column align-items-center" data-orderId="${item.orderId}" data-serviceId="${item.serviceId}" data-is-test="${Number(item.serviceName.includes('测试'))}">
+            <img src="${item.imgUrl}" class="app-logo">
+            <h5 class="app-name">${item.serviceName}</h5>
+          </div>
+        `).join('')
+        this.appListDom.innerHTML = appListHtml
+        this.listIsShow()
+      } catch(err) {
+        this.loginDom.classList.remove('hide')
+        return
+      }
+    },
+    /**
+     * 列表是否展示
+     */
+    listIsShow() {
+      const { isProdution, isCode, isJump } = defaultInfo.conditionObj
+      const applistChildren = Array.from(this.appListDom.children)
+      if(!isProdution && !isCode && !isJump) {
+        applistChildren.forEach(item => {
+          item.classList.remove('hide')
+        })
+        return
+      }
+      const appList = applistChildren.filter(item => !parseInt(item.getAttribute('data-is-test')) === isProdution)
+      applistChildren.forEach(item => {
+        if(appList.includes(item)) {
+          item.classList.remove('hide')
+        } else {
+          item.classList.add('hide')
         }
       })
-      const url = 'http://pddmove.chaojids.com/?code=' + code
-      loading.hide()
-      const { isJump } = await defaultInfo.handleResult(url)
-      if(!isJump) return
-      window.open(defaultInfo.insertStr(url, url.indexOf('.'), 'test'))
-    })
+    },
   },
-  /**
-   * 获取应用列表
-   */
-  async getAppList() {
-    try {
-      const list = [{
-        img_logo: 'https://picasso-static.xiaohongshu.com/open-api/100101tg2pig4r06ee00672ap65l44vg0076qmv11cakuk',
-        clientId: '330453bf045d417fb897e6039b5ec007',
-        app_name: '临时的抖搬家-拼多多',
-      }]
+  // 拼多多相关
+  pddInfo: {
+    name: '拼多多平台',
+    type: 'pdd',
+    url: 'https://fuwu.pinduoduo.com/', // api地址
+    loginUrl: 'https://fuwu.pinduoduo.com/service-market/auth?response_type=code&client_id=330453bf045d417fb897e6039b5ec007&redirect_uri=http://pddmove.chaojids.com/&state=dev', // 登录链接
+    loginDom: null,
+    appListDom: null,
+    /**
+     * 初始化
+     */
+    async init() {
+      if(initFlag) {
+        this.eventListener()
+      }
+      await this.getAppList()
+      initFlag = false
+    },
+    /**
+     * 监听dom事件
+     */
+    eventListener() {
+      const that = this
+      this.appListDom.addEventListener('click', async function(e) {
+        const targetNode = e.target.parentNode
+        if(!targetNode.classList.contains('item')) return
+        const clientId = targetNode.getAttribute('data-clientId')
+        const loading = defaultInfo.createLoading('玩命加载中，请稍后...')
+        var anti_contnt = xjb(5)
+        result = new anti_contnt({ serverTime: new Date().getTime() })
+        const { result: { code } } = await axios({
+          url: that.url + 'columbine/oauth/authorize',
+          method: 'POST',
+          data: {
+            clientId,
+            responseType: "code",
+            isTrial: 0,
+            state: "dev",
+            scope: []
+          },
+          headers: {
+            'Origin': 'https://fuwu.pinduoduo.com',
+            'Anti-Content': result.messagePack()
+          }
+        })
+        const url = 'http://pddmove.chaojids.com/?code=' + code
+        loading.hide()
+        const { isJump } = await defaultInfo.handleResult(url)
+        if(!isJump) return
+        window.open(defaultInfo.insertStr(url, url.indexOf('.'), 'test'))
+      })
+    },
+    /**
+     * 获取应用列表
+     */
+    async getAppList() {
+      try {
+        await fetch(this.url + 'api/columbine/user/token/info',)
+        const { result: { list } } = await axios({
+          url: this.url + 'columbine/pop/service/time/length/list',
+          method: 'POST',
+          data: {
+            "page": 1,
+            "pageSize": 10,
+            "isExpired": false
+          }
+        })
+        // console.log(list)
+        // const list = [{
+        //   img_logo: 'https://picasso-static.xiaohongshu.com/open-api/100101tg2pig4r06ee00672ap65l44vg0076qmv11cakuk',
+        //   clientId: '330453bf045d417fb897e6039b5ec007',
+        //   app_name: '临时的抖搬家-拼多多',
+        // }]
+        this.loginDom.classList.add('hide')
+        const appListHtml = list.map(item => `
+          <div class="item pointer flex flex-column align-items-center" data-clientId="${defaultInfo.getParams(item.oauthRedirectUri)?.client_id || ''}">
+            <img src="${item.logoUrl}" class="app-logo">
+            <h5 class="app-name">${item.serviceName}</h5>
+          </div>
+        `).join('')
+        this.appListDom.innerHTML = appListHtml
+      } catch(err) {
+        console.error(err)
+        this.loginDom.classList.remove('hide')
+        return
+      }
+    },
+  },
+  // 京东相关
+  jdInfo: {
+    name: '京东平台',
+    type: 'jd',
+    url: 'https://fw.jd.com/', // api地址
+    loginUrl: 'https://passport.shop.jd.com/login/index.action', // 登录链接
+    loginDom: null,
+    appListDom: null,
+    /**
+     * 初始化
+     */
+    async init() {
+      if(initFlag) {
+        this.eventListener()
+      }
+      await this.getAppList()
+      initFlag = false
+    },
+    /**
+     * 监听dom事件
+     */
+    eventListener() {
+      const that = this
+      this.appListDom.addEventListener('click', async function(e) {
+        const targetNode = e.target.parentNode
+        if(!targetNode.classList.contains('item')) return
+        const serviceCode = targetNode.getAttribute('data-serviceCode')
+        const itemCode = targetNode.getAttribute('data-itemCode')
+        const loading = defaultInfo.createLoading('玩命加载中，请稍后...')
+        const callback = 'jsonp' + Date.now()
+        const res = await axios({
+          url: that.url + 'ser/usingNew.action',
+          method: 'GET',
+          params: {
+            serviceInfo: JSON.stringify({
+              serviceCode,
+              itemCode,
+              isZeroPurchase: false,
+            }),
+            callback,
+            v: 3072,
+          }
+        })
+        const { body } = await new Promise(resolve => {
+          window[callback] = function(res) {
+            resolve(res)
+            delete window[callback]
+          }
+          eval(res)
+        })
+        const url = 'http://jdmove.chaojids.com/?' + body.url.split('?')[1]
+        loading.hide()
+        const { isJump } = await defaultInfo.handleResult(url)
+        if(!isJump) return
+        window.open(defaultInfo.insertStr(url, url.indexOf('.'), 'test'))
+      })
+    },
+    /**
+     * 获取应用列表
+     */
+    async getAppList() {
+      const { code, data } = await axios({
+        url: 'https://sff.jd.com/api?v=1.0&api=dsm.fuwu.fwmarket.service.MyServiceDsmProvider.queryMyService&appId=ZX4CQB3H0F5HAQ5RCM0G',
+        method: 'POST',
+        data: {
+          "request": {
+            "pageSize": 10,
+            "page": 1,
+            "queryTab": "default",
+            "cid": 0
+          }
+        }
+      })
+      if(code !== 200) return this.loginDom.classList.remove('hide')
+      const list = data.myServiceArchivesVoPage.list.filter(item => item.serviceName.includes('抖搬家'))
       this.loginDom.classList.add('hide')
       const appListHtml = list.map(item => `
-        <div class="item pointer flex flex-column align-items-center" data-clientId="${item.clientId}">
-          <img src="${item.img_logo}" class="app-logo">
-          <h5 class="app-name">${item.app_name}</h5>
+        <div class="item pointer flex flex-column align-items-center" data-serviceCode="${item.serviceCode}" data-itemCode="${item.itemCode}">
+          <img src="${'https:' + item.serviceLogo}" class="app-logo">
+          <h5 class="app-name">${item.serviceName}</h5>
         </div>
       `).join('')
       this.appListDom.innerHTML = appListHtml
-    } catch(err) {
-      this.loginDom.classList.remove('hide')
-      return
-    }
-  },
-  /**
-   * 获取小红书 cookie 中的token
-   */
-  getCookieToken() {
-    return new Promise(resolve => {
-      chrome.cookies.get({ url: "https://ark.xiaohongshu.com", name: "access-token-ark.xiaohongshu.com" }, function(cookie) {
-        if (cookie) {
-          resolve(cookie.value.split('customer.ark.')[1])
-        } else {
-          resolve(null)
-        }
-      });
-    })
+    },
   },
 }
 
 async function pageInit() {
+  const platformList = document.querySelector('.platform-list')
+  const info = Object.values(platformInfoList)
+  if(!platformList.children.length) {
+    const html = info.map(item => `
+      <li>
+        <div class="title flex align-items-center">
+          <h3>${item.name}：</h3>
+          <a target="_blank" class="hide" id="${item.type}-login" href="${item.loginUrl}">未登录</a>
+        </div>
+        <div class="list flex" id="${item.type}-app-list">
+        </div>
+      </li>
+    `).join('')
+    platformList.innerHTML = html
+  }
   defaultInfo.init()
-  ksInfo.init()
-  sphInfo.init()
-  xhsInfo.init()
-  pddInfo.init()
+  info.forEach(item => {
+    item.loginDom = document.getElementById(`${item.type}-login`)
+    item.appListDom = document.getElementById(`${item.type}-app-list`)
+    item.init()
+  })
 }
 
 document.addEventListener("visibilitychange", function() {
   //浏览器切换事件
   if (document.visibilityState !== "hidden") {
     //状态判断
-    // pageInit()
+    pageInit()
   }
 })
 
@@ -5944,6 +6051,10 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
   details => {
     if(details.url.includes('fuwu.pinduoduo.com')) {
       details.requestHeaders.push({name: 'Origin', value: 'https://fuwu.pinduoduo.com'})
+    } else if(details.url.includes('sff.jd.com')) {
+      details.requestHeaders.push({name: 'Origin', value: 'https://fw.jd.com'})
+      details.requestHeaders.push({name: 'Dsm-Platform', value: 'pc'})
+      details.requestHeaders.push({name: 'Dsm-Trace-Id', value: 'f08faf4d-582a-d847-e750-53e3bdeefb6e'})
     }
     return { requestHeaders: details.requestHeaders }
   },
