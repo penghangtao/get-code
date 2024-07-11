@@ -53,7 +53,7 @@ const defaultInfo = {
         }
         this.conditionObj[key] = checked
       }
-      sphInfo.listIsShow()
+      platformInfoList.sphInfo.listIsShow()
     })
   },
   /**
