@@ -362,8 +362,8 @@ const platformInfoList = {
   sphInfo: {
     name: '视频号平台',
     type: 'sph',
-    url: 'https://channels.weixin.qq.com/shop-faas/mmecnodeservicemarket/service/', // api地址
-    loginUrl: 'https://channels.weixin.qq.com/shop', // 登录链接
+    url: 'https://store.weixin.qq.com/shop-faas/mmecnodeservicemarket/service/', // api地址
+    loginUrl: 'https://store.weixin.qq.com/shop', // 登录链接
     loginDom: null,
     appListDom: null,
     /**
@@ -386,6 +386,7 @@ const platformInfoList = {
         if(!targetNode.classList.contains('item')) return
         const orderId = targetNode.getAttribute('data-orderId')
         const serviceId = targetNode.getAttribute('data-serviceId')
+        const biz_magic = targetNode.getAttribute('data-biz_magic')
         const loading = defaultInfo.createLoading('玩命加载中，请稍后...')
         const { jumpUrl } = await axios({
           url: that.url + 'GenJumpServiceUrl',
@@ -395,6 +396,9 @@ const platformInfoList = {
             orderId,
             token: '',
             lang: 'zh_CN',
+          },
+          headers: {
+            biz_magic,
           }
         })
         loading.hide()
@@ -408,6 +412,7 @@ const platformInfoList = {
      */
     async getAppList() {
       try {
+        const biz_magic = await getCookie('https://store.weixin.qq.com/', 'biz_magic')
         const { itemList } = await axios({
           url: this.url + 'GetMyServiceList',
           method: 'GET',
@@ -417,12 +422,15 @@ const platformInfoList = {
             status: 2,
             token: '',
             lang: 'zh_CN'
-          }
+          },
+          headers: {
+            biz_magic
+          },
         })
         const list = itemList.filter(item => item.subjectName === '杭州耀秀电子商务有限公司' && item.state === 1)
         this.loginDom.classList.add('hide')
         const appListHtml = list.map(item => `
-          <div class="item pointer flex flex-column align-items-center" data-orderId="${item.orderId}" data-serviceId="${item.serviceId}" data-is-test="${Number(item.serviceName.includes('测试'))}">
+          <div class="item pointer flex flex-column align-items-center" data-biz_magic="${biz_magic}" data-orderId="${item.orderId}" data-serviceId="${item.serviceId}" data-is-test="${Number(item.serviceName.includes('测试'))}">
             <img src="${item.imgUrl}" class="app-logo">
             <h5 class="app-name">${item.serviceName}</h5>
           </div>
@@ -6045,6 +6053,16 @@ window.onload = function() {
   },
 ])()
 
+/**
+ * 获取cookie
+ */
+function getCookie(url, name) {
+  return new Promise(resolve => {
+    chrome.cookies.get({url, name}, function(obj) {
+      resolve(obj?.value || '')
+    })
+  })
+}
 
 // 模拟请求头
 chrome.webRequest.onBeforeSendHeaders.addListener(
@@ -6056,6 +6074,10 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
       details.requestHeaders.push({name: 'Dsm-Platform', value: 'pc'})
       details.requestHeaders.push({name: 'Dsm-Trace-Id', value: 'f08faf4d-582a-d847-e750-53e3bdeefb6e'})
     }
+    // else if(details.url.includes('store.weixin.qq.com')) {
+    //   const value = await getCookie('https://store.weixin.qq.com/', 'biz_magic')
+    //   details.requestHeaders.push({name: 'biz_magic', value})
+    // }
     return { requestHeaders: details.requestHeaders }
   },
   { urls: ["<all_urls>"] },

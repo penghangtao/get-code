@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "获取授权链接",
   "description": "获取授权链接插件",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "browser_action": {
     "default_title": "获取授权链接",
     "default_icon": "images/icon48.png",
