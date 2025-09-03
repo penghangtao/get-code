@@ -1,39 +1,39 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "获取授权链接",
   "description": "获取授权链接插件",
-  "version": "1.0.4",
-  "browser_action": {
+  "version": "1.1.0",
+  "action": {
     "default_title": "获取授权链接",
     "default_icon": "images/icon48.png",
     "default_popup": "popup/popup.html"
   },
   "background": {
-    "scripts": [
-      "js/a_bogus.js",
-      "js/a_bogus_new.js",
-      "js/my-axios.js",
-      "js/a_bogus_164_bdms.js",
-      "background/index.js"
-    ]
+    "service_worker": "background/background.js"
   },
   "permissions": [
     "cookies",
-		"tabs",
-		"notifications",
-		"webRequest",
-		"webRequestBlocking",
-		"storage",
-		"unlimitedStorage",
-		"http://*/*",
-		"https://*/*"
+    "tabs",
+    "notifications",
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess",
+    "management",
+    "webRequest",
+    "storage",
+    "unlimitedStorage"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
   ],
   "icons": {
     "16": "images/icon48.png",
     "48": "images/icon48.png",
     "128": "images/icon48.png"
   },
-  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
   "content_scripts": [
     {
       "matches": [
@@ -52,5 +52,14 @@
         "js/tiktok-notranslate.js"
       ]
     }
-  ]
+  ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "ruleset_1",
+        "enabled": true,
+        "path": "rules.json"
+      }
+    ]
+  }
 }

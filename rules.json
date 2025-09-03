@@ -1,0 +1,48 @@
+[
+  {
+    "id": 1,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Origin",
+          "operation": "set",
+          "value": "https://fuwu.pinduoduo.com"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*://fuwu.pinduoduo.com/*",
+      "resourceTypes": ["xmlhttprequest", "main_frame", "sub_frame"]
+    }
+  },
+  {
+    "id": 2,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Origin",
+          "operation": "set",
+          "value": "https://fw.jd.com"
+        },
+        {
+          "header": "Dsm-Platform",
+          "operation": "set",
+          "value": "pc"
+        },
+        {
+          "header": "Dsm-Trace-Id",
+          "operation": "set",
+          "value": "f08faf4d-582a-d847-e750-53e3bdeefb6e"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*://sff.jd.com/*queryMyService",
+      "resourceTypes": ["xmlhttprequest", "main_frame", "sub_frame"]
+    }
+  }
+]

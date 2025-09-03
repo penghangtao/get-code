@@ -5872,6 +5872,10 @@ async function dyOld(options) {
   }
 }
 
+
+// 
+
+
 /* dyOld({
   url: 'https://haohuo.jinritemai.com/aweme/v2/shop/promotion/pack/h5/',
   params: {
@@ -5959,4 +5963,3 @@ dyOld({
 //   },
 //   contentType: 'application/x-www-form-urlencoded'
 // })
-

@@ -301,7 +301,7 @@ const platformInfoList = {
     async getAppList() {
       try {
         const xhsToken = await this.getCookieToken()
-        if(!xhsToken) return
+        if(!xhsToken) return this.loginDom.classList.remove('hide')
         const { data: { account: { auth_token, seller_id } } } = await axios({
           url: this.url + 'edith/account',
           method: 'GET',
@@ -331,7 +331,7 @@ const platformInfoList = {
           },
         })
         this.loginDom.classList.add('hide')
-        const appListHtml = app_infos.map(item => `
+        const appListHtml = app_infos.filter(item => item.app_name.includes('抖搬家')).map(item => `
           <div class="item pointer flex flex-column align-items-center" data-appId="${item.app_id}" data-redirectUrl="${item.app_website}">
             <img src="${item.app_icon_url}" class="app-logo">
             <h5 class="app-name">${item.app_name}</h5>
@@ -595,14 +595,16 @@ const platformInfoList = {
             v: 3072,
           }
         })
-        const { body } = await new Promise(resolve => {
+        /* const { body } = await new Promise(resolve => {
           window[callback] = function(res) {
             resolve(res)
             delete window[callback]
           }
           eval(res)
-        })
-        const url = 'http://jdmove.chaojids.com/?' + body.url.split('?')[1]
+        }) */
+        const reg = /http[s]?:\/\/[^\s"]+/
+        const resultUrl = res.match(reg)?.[0]
+        const url = 'http://jdmove.chaojids.com/?' + resultUrl.split('?')[1]
         loading.hide()
         const { isJump } = await defaultInfo.handleResult(url)
         if(!isJump) return
@@ -614,7 +616,7 @@ const platformInfoList = {
      */
     async getAppList() {
       const { code, data } = await axios({
-        url: 'https://sff.jd.com/api?v=1.0&api=dsm.fuwu.fwmarket.service.MyServiceDsmProvider.queryMyService&appId=ZX4CQB3H0F5HAQ5RCM0G',
+        url: 'https://sff.jd.com/api?v=1.0&appId=ZX4CQB3H0F5HAQ5RCM0G&api=dsm.fuwu.fwmarket.service.MyServiceDsmProvider.queryMyService',
         method: 'POST',
         data: {
           "request": {
@@ -637,6 +639,117 @@ const platformInfoList = {
       this.appListDom.innerHTML = appListHtml
     },
   },
+  // 1688平台相关
+  y1688Info: {
+    name: '1688平台',
+    type: 'y1688',
+    url: 'https://api.1688.com/', // api地址（待定）
+    loginUrl: 'https://login.taobao.com/?redirect_url=https%3A%2F%2Flogin.1688.com%2Fmember%2Fjump.htm%3Ftarget%3Dhttps%253A%252F%252Flogin.1688.com%252Fmember%252FmarketSigninJump.htm%253FDone%253Dhttps%25253A%25252F%25252Ffuwu.1688.com&style=tao_custom&from=1688web', // 登录链接
+    loginDom: null,
+    appListDom: null,
+    /**
+     * 初始化
+     */
+    async init() {
+      if(initFlag) {
+        this.eventListener()
+      }
+      await this.getAppList()
+      initFlag = false
+    },
+    /**
+     * 监听dom事件
+     */
+    eventListener() {
+      const that = this
+      this.appListDom.addEventListener('click', async function(e) {
+        const targetNode = e.target.parentNode
+        if(!targetNode.classList.contains('item')) return
+        const testUrl = 'https://auth.1688.com/oauth/managed?_aop_timestamp=1742811056670&_aop_timestamp_diff=3600000&client_id=4704490&sceneId=daily_homepage&_aop_signature=17358D326FEB4A5EDD68DA172A6FC1E9940B5850'
+        if(defaultInfo.conditionObj.isJump) {
+          return window.open(testUrl)
+        }
+        const loading = defaultInfo.createLoading('玩命加载中，请稍后...')
+        const res = await axios({
+          url: testUrl,
+          method: 'GET'
+        }).finally(() => {
+          loading.hide()
+        })
+        const parser = new DOMParser()
+        const doc = parser.parseFromString(res, 'text/html')
+        const code = doc.querySelector('iframe').src.split('?')[1]
+        const url = 'https://albbmove.chaojids.com/?' + code
+        const { isJump } = await defaultInfo.handleResult(url)
+        if(!isJump) return
+        window.open(defaultInfo.insertStr(url, url.indexOf('.'), '.test'))
+        /* const targetNode = e.target.parentNode
+        if(!targetNode.classList.contains('item')) return
+        const serviceCode = targetNode.getAttribute('data-serviceCode')
+        const itemCode = targetNode.getAttribute('data-itemCode')
+        const loading = defaultInfo.createLoading('玩命加载中，请稍后...')
+        const callback = 'jsonp' + Date.now()
+        const res = await axios({
+          url: that.url + 'ser/usingNew.action',
+          method: 'GET',
+          params: {
+            serviceInfo: JSON.stringify({
+              serviceCode,
+              itemCode,
+              isZeroPurchase: false,
+            }),
+            callback,
+            v: 3072,
+          }
+        })
+        const { body } = await new Promise(resolve => {
+          window[callback] = function(res) {
+            resolve(res)
+            delete window[callback]
+          }
+          eval(res)
+        })
+        const url = 'http://jdmove.chaojids.com/?' + body.url.split('?')[1]
+        loading.hide()
+        const { isJump } = await defaultInfo.handleResult(url)
+        if(!isJump) return
+        window.open(defaultInfo.insertStr(url, url.indexOf('.'), 'test')) */
+      })
+    },
+    /**
+     * 获取应用列表
+     */
+    async getAppList() {
+      /* const { code, data } = await axios({
+        url: 'https://sff.jd.com/api?v=1.0&api=dsm.fuwu.fwmarket.service.MyServiceDsmProvider.queryMyService&appId=ZX4CQB3H0F5HAQ5RCM0G',
+        method: 'POST',
+        data: {
+          "request": {
+            "pageSize": 10,
+            "page": 1,
+            "queryTab": "default",
+            "cid": 0
+          }
+        }
+      })
+      if(code !== 200) return this.loginDom.classList.remove('hide')
+      const list = data.myServiceArchivesVoPage.list.filter(item => item.serviceName.includes('抖搬家'))
+      this.loginDom.classList.add('hide') */
+      const list = [{
+        serviceCode: '1688_1688_1688',
+        itemCode: '1688_1688_1688',
+        serviceName: '1688抖搬家测试（参数暂时写死）',
+        serviceLogo: 'https://img30.360buyimg.com/fwmarket/jfs/t1/223876/30/41456/48641/004e4201F2f86f3cc/3f3c542a491bec1e.gif',
+      }]
+      const appListHtml = list.map(item => `
+        <div class="item pointer flex flex-column align-items-center" data-serviceCode="${item.serviceCode}" data-itemCode="${item.itemCode}">
+          <img src="${item.serviceLogo}" class="app-logo">
+          <h5 class="app-name">${item.serviceName}</h5>
+        </div>
+      `).join('')
+      this.appListDom.innerHTML = appListHtml
+    },
+  },
 }
 
 async function pageInit() {
@@ -649,7 +762,7 @@ async function pageInit() {
           <h3>${item.name}：</h3>
           <a target="_blank" class="hide" id="${item.type}-login" href="${item.loginUrl}">未登录</a>
         </div>
-        <div class="list flex" id="${item.type}-app-list">
+        <div class="list flex flex-wrap" id="${item.type}-app-list">
         </div>
       </li>
     `).join('')
