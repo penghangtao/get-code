@@ -175,10 +175,14 @@
     // 是否跳转测试环境
     if(isJump) {
       let jumpUrl = url
-      if(url.includes('dadan.hzyqds.com') || url.includes('sms.chaojids.com')) {
+      if(url.includes('dadan.hzyqds.com') || url.includes('sms.chaojids.com') || url.includes('51maibaole.com')) {
         jumpUrl = jumpUrl.replace('https', 'http')
       }
-      jumpUrl = insertStr(jumpUrl, jumpUrl.indexOf('.'), 'test')
+      if(jumpUrl.includes('51maibaole.com')) {
+        jumpUrl = jumpUrl.replace('51maibaole.com', 'test.chaojids.com')
+      } else {
+        jumpUrl = insertStr(jumpUrl, jumpUrl.indexOf('.'), 'test')
+      }
       window.open(jumpUrl)
       return
     }
